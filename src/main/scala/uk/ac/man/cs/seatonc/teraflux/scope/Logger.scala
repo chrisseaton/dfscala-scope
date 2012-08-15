@@ -104,11 +104,14 @@ class Logger extends DFLogger {
                     }
                 }
 
-                val webServer = WebServers.createWebServer(8080)
+                val port = 8080
+
+                val webServer = WebServers.createWebServer(port)
+                webServer.add(new ResourceHttpHandler("/client", classOf[Logger]))
                 webServer.add("/socket", webSocketHandler)
                 webServer.start()
 
-                System.err.println("scope: waiting for the connection from your browser...")
+                System.err.println("scope: go to http://localhost:" + port + "/")
 
                 val webSocketConnection = webSocketConnectionVar.take()
 

@@ -19,7 +19,7 @@ object Example extends DFApp {
         Thread.sleep(random.nextInt(1000))
 
         if (n < 2) {
-            n
+            out(n)
         } else {
             val adder = DFManager.createThread((a: Int, b: Int) => out(a + b))
 

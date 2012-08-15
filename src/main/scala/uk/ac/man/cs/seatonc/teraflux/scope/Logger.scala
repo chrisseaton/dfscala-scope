@@ -128,8 +128,8 @@ class Logger extends DFLogger {
                     for (message <- messages.reverse) {
                         if (message == null)
                             finished = true
-
-                        webSocketConnection.send(message)
+                        else
+                            webSocketConnection.send(message)
                     }
 
                     if (messages == Nil)

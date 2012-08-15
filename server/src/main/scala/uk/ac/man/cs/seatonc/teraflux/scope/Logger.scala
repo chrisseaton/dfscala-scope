@@ -3,6 +3,7 @@ package uk.ac.man.cs.seatonc.teraflux.scope
 import scala.util.Properties
 import scala.concurrent.SyncVar
 
+import com.codahale.jerkson.Json._
 import org.webbitserver._
 
 import eu.teraflux.uniman.transactions.TMLib._
@@ -15,20 +16,22 @@ class Logger extends DFLogger {
     var nextManagerId = 0
 
     var serverThread: Thread = null
-    var messageQueue = List[List[(String, String)]]()
+    var messageQueue = List[String]()
 
     def threadCreated(child:DFThread, parent:DFThread) {
-        queue(List("\"message\"" -> "\"thread-created\"",
-            "\"parent\"" -> parent.logID.toString,
-            "\"child\"" -> child.logID.toString,
-            "\"time\"" -> getTime().toString))
+        queue(generate(Map(
+            "message" -> "thread-created",
+            "parent" -> parent.logID,
+            "child" -> child.logID,
+            "time" -> getTime())))
     }
 
     def threadCreated(child:DFThread, manager:DFManager) {
-        queue(List("\"message\"" -> "\"thread-created\"",
-            "\"parent\"" -> "0",
-            "\"child\"" -> child.logID.toString,
-            "\"time\"" -> getTime().toString))
+        queue(generate(Map(
+            "message" -> "thread-created",
+            "parent" -> 0,
+            "child" -> child.logID,
+            "time" -> getTime())))
     }
 
     def barrierCreated(bar:DFBarrier, sC:Int) {
@@ -36,19 +39,21 @@ class Logger extends DFLogger {
     }
     
     def tokenPassed(from:DFThread, to:DFThread, argNo:Int) {
-        queue(List("\"message\"" -> "\"token-passed\"",
-            "\"from\"" -> from.logID.toString,
-            "\"to\"" -> to.logID.toString,
-            "\"arg\"" -> argNo.toString,
-            "\"time\"" -> getTime().toString))
+        queue(generate(Map(
+            "message" -> "token-passed",
+            "from" -> from.logID,
+            "to" -> to.logID,
+            "arg" -> argNo,
+            "time" -> getTime())))
     }
     
     def tokenPassed(from:DFManager, to:DFThread, argNo:Int) {
-        queue(List("\"message\"" -> "\"token-passed\"",
-            "\"from\"" -> "0",
-            "\"to\"" -> to.logID.toString,
-            "\"arg\"" -> argNo.toString,
-            "\"time\"" -> getTime().toString))
+        queue(generate(Map(
+            "message" -> "token-passed",
+            "from" -> 0,
+            "to" -> to.logID,
+            "arg" -> argNo,
+            "time" -> getTime())))
     }
     
     def nullTokenPassed(from:DFThread) {
@@ -56,17 +61,18 @@ class Logger extends DFLogger {
     }
     
     def threadStarted(thread:DFThread) {
-        queue(List("\"message\"" -> "\"thread-started\"",
-            "\"thread\"" -> thread.logID.toString,
-            "\"worker\"" -> ("\"" + getWorkerName() + "\""),
-            "\"time\"" -> getTime().toString))
+        queue(generate(Map(
+            "message" -> "thread-started",
+            "thread" -> thread.logID,
+            "worker" -> getWorkerName(),
+            "time" -> getTime())))
     }
     
     def threadFinished(thread:DFThread) {
-        queue(List("\"message\"" -> "\"thread-finished\"",
-            "\"thread\"" -> thread.logID.toString,
-            "\"worker\"" -> ("\"" + getWorkerName() + "\""),
-            "\"time\"" -> getTime().toString))
+        queue(generate(Map(
+            "message" -> "thread-finished",
+            "thread" -> thread.logID,
+            "time" -> getTime())))
     }
     
     def threadToBarrier(thread:DFThread, barrier:DFBarrier) {
@@ -106,7 +112,7 @@ class Logger extends DFLogger {
 
                 val webSocketConnection = webSocketConnectionVar.take()
 
-                queue(List("\"message\"" -> "\"connected\""))
+                queue(generate(Map("message" -> "connected")))
 
                 flag.put(())
 
@@ -120,13 +126,10 @@ class Logger extends DFLogger {
                     }
 
                     for (message <- messages.reverse) {
-                        if (message == Nil)
+                        if (message == null)
                             finished = true
 
-                        val json = "{" + message.map(_.productIterator.mkString(":")).mkString(",") + "}"
-
-                        System.err.println(json)
-                        webSocketConnection.send(json)
+                        webSocketConnection.send(message)
                     }
 
                     if (messages == Nil)
@@ -149,8 +152,8 @@ class Logger extends DFLogger {
     }
     
     def managerFinish(manager:DFManager) {
-        queue(List("\"message\"" -> "\"finished\""))
-        queue(Nil)
+        queue(generate(Map("message" -> "finished")))
+        queue(null)
         serverThread.join()
     }
     
@@ -178,7 +181,7 @@ class Logger extends DFLogger {
     def getWorkerName(): String =
         Thread.currentThread().getName()
 
-    def queue(message: List[(String, String)]) {
+    def queue(message: String) {
         atomic {
             messageQueue ::= message
         }

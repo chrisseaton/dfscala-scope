@@ -96,41 +96,53 @@ function createWorkers(connection) {
             context.fillText(String(t) + "s", t * wPerSecond + 2, h - 2);
         }
 
-        context.font = "10px";
+        var deferText = [];
 
         for (n = 0; n < workers.length; n++) {
             var worker = workers[n];
             var threads = workerThreads[worker];
 
             for (i = 0; i < threads.length; i++) {
-                var thread = threads[i];
+                (function(i) {
+                    var thread = threads[i];
 
-                var start = threadStartTimes[thread];
-                var finish = threadFinishTimes[thread];
+                    var start = threadStartTimes[thread];
+                    var finish = threadFinishTimes[thread];
 
-                if (finish == undefined) {
-                } else {
-                    var duration = finish - start;
+                    if (finish == undefined) {
+                    } else {
+                        var duration = finish - start;
 
-                    var tx = start * wPerSecond;
-                    var ty = n * workerH;
-                    var tw = duration * wPerSecond;
-                    var th = workerH;
+                        var tx = start * wPerSecond;
+                        var ty = n * workerH;
+                        var tw = duration * wPerSecond;
+                        var th = workerH;
 
-                    context.fillStyle = threadColours[thread];
-                    context.fillRect(tx, ty, tw, th);
+                        context.fillStyle = threadColours[thread];
+                        context.fillRect(tx, ty, tw, th);
 
-                    context.strokeStyle = "#000000";
-                    context.strokeRect(tx, ty, tw, th);
+                        context.strokeStyle = "#000000";
+                        context.strokeRect(tx, ty, tw, th);
 
-                    context.fillStyle = "#000000";
-                    drawTextAt(context, "#" + String(thread), tx + (tw/2), ty + (th/2) + 1, 10);
+                        deferText.push(function() {
+                            context.fillStyle = "#000000";
+                            drawTextAt(context, "#" + String(thread), tx + (tw/2), ty + (th/2) + 1, 10);
 
-                    context.fillStyle = "#ffffff";
-                    drawTextAt(context, "#" + String(thread), tx + (tw/2), ty + (th/2) + 2, 10);
-                }
+                            context.fillStyle = "#ffffff";
+                            drawTextAt(context, "#" + String(thread), tx + (tw/2), ty + (th/2) + 2, 10);
+                        });
+                    }
+                })(i);
             }
         }
+
+        function apply(f) {
+            return f();
+        }
+
+        context.font = "10px";
+
+        _.map(deferText, apply);
     }
 
     function sizeCanvas() {

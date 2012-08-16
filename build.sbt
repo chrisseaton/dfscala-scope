@@ -12,7 +12,9 @@ assemblySettings
 
 assembleArtifact in packageScala := false
 
-//excludedJars in assembly ++= Seq("lib/muts_2.8-rv41.jar", "lib/dflib-rv291.jar")
+excludedJars in assembly <<= (fullClasspath in assembly) map {
+    _.filter( c => c.data.getName.contains("muts") || c.data.getName.contains("dflib") )
+}
 
 libraryDependencies += "com.codahale" % "jerkson_2.9.1" % "0.5.0"
 

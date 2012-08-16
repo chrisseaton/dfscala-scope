@@ -16,22 +16,64 @@ class Logger extends DFLogger {
     var nextManagerId = 0
 
     var serverThread: Thread = null
-    var messageQueue = List[String]()
+    var messageQueue = List[Message]()
+
+    abstract class Message {
+        def toJson : String
+    }
+
+    case object ConnectedMessage extends Message {
+        override def toJson : String = generate(Map(
+            "message" -> "connected"))
+    }
+
+    case object FinishedMessage extends Message {
+        override def toJson : String = generate(Map(
+            "message" -> "finished"))
+    }
+    
+    case class ThreadCreatedMessage(parent: Int, child: Int, time: Double) extends Message {
+        override def toJson : String = generate(Map(
+            "message" -> "thread-created",
+            "parent" -> parent,
+            "child" -> child,
+            "time" -> time))
+    }
+    
+    case class TokenPassedMessage(from: Int, to: Int, arg: Int, time: Double) extends Message {
+        override def toJson : String = generate(Map(
+            "message" -> "token-passed",
+            "from" -> from,
+            "to" -> to,
+            "arg" -> arg,
+            "time" -> time))
+    }
+    
+    case class ThreadStartedMessage(thread: Int, worker: String, time: Double) extends Message {
+        override def toJson : String = generate(Map(
+            "message" -> "thread-started",
+            "thread" -> thread,
+            "worker" -> worker,
+            "time" -> time))
+    }
+    
+    case class ThreadFinishedMessage(thread: Int, time: Double) extends Message {
+        override def toJson : String = generate(Map(
+            "message" -> "thread-finished",
+            "thread" -> thread,
+            "time" -> time))
+    }
 
     def threadCreated(child:DFThread, parent:DFThread) {
-        queue(generate(Map(
-            "message" -> "thread-created",
-            "parent" -> parent.logID,
-            "child" -> child.logID,
-            "time" -> getTime())))
+        atomic {
+            messageQueue ::= ThreadCreatedMessage(parent.logID, child.logID, getTime())
+        }
     }
 
     def threadCreated(child:DFThread, manager:DFManager) {
-        queue(generate(Map(
-            "message" -> "thread-created",
-            "parent" -> 0,
-            "child" -> child.logID,
-            "time" -> getTime())))
+        atomic {
+            messageQueue ::= ThreadCreatedMessage(0, child.logID, getTime())
+        }
     }
 
     def barrierCreated(bar:DFBarrier, sC:Int) {
@@ -39,21 +81,15 @@ class Logger extends DFLogger {
     }
     
     def tokenPassed(from:DFThread, to:DFThread, argNo:Int) {
-        queue(generate(Map(
-            "message" -> "token-passed",
-            "from" -> from.logID,
-            "to" -> to.logID,
-            "arg" -> argNo,
-            "time" -> getTime())))
+        atomic {
+            messageQueue ::= TokenPassedMessage(from.logID, to.logID, argNo, getTime())
+        }
     }
     
     def tokenPassed(from:DFManager, to:DFThread, argNo:Int) {
-        queue(generate(Map(
-            "message" -> "token-passed",
-            "from" -> 0,
-            "to" -> to.logID,
-            "arg" -> argNo,
-            "time" -> getTime())))
+        atomic {
+            messageQueue ::= TokenPassedMessage(0, to.logID, argNo, getTime())
+        }
     }
     
     def nullTokenPassed(from:DFThread) {
@@ -61,18 +97,15 @@ class Logger extends DFLogger {
     }
     
     def threadStarted(thread:DFThread) {
-        queue(generate(Map(
-            "message" -> "thread-started",
-            "thread" -> thread.logID,
-            "worker" -> getWorkerName(),
-            "time" -> getTime())))
+        atomic {
+            messageQueue ::= ThreadStartedMessage(thread.logID, getWorkerName(), getTime())
+        }
     }
     
     def threadFinished(thread:DFThread) {
-        queue(generate(Map(
-            "message" -> "thread-finished",
-            "thread" -> thread.logID,
-            "time" -> getTime())))
+        atomic {
+            messageQueue ::= ThreadFinishedMessage(thread.logID, getTime())
+        }
     }
     
     def threadToBarrier(thread:DFThread, barrier:DFBarrier) {
@@ -115,7 +148,9 @@ class Logger extends DFLogger {
 
                 val webSocketConnection = webSocketConnectionVar.take()
 
-                queue(generate(Map("message" -> "connected")))
+                atomic {
+                    messageQueue ::= ConnectedMessage
+                }
 
                 flag.put(())
 
@@ -123,20 +158,19 @@ class Logger extends DFLogger {
 
                 while (!finished) {
                     val messages = atomic {
-                        val tempMessages = messageQueue
+                        val temp = messageQueue
                         messageQueue = Nil
-                        tempMessages
+                        temp
                     }
 
                     for (message <- messages.reverse) {
-                        if (message == null)
+                        webSocketConnection.send(message.toJson)
+
+                        if (message == FinishedMessage)
                             finished = true
-                        else
-                            webSocketConnection.send(message)
                     }
 
-                    if (messages == Nil)
-                        Thread.sleep(100)
+                    Thread.sleep(100)
                 }
 
                 webServer.stop()
@@ -155,8 +189,10 @@ class Logger extends DFLogger {
     }
     
     def managerFinish(manager:DFManager) {
-        queue(generate(Map("message" -> "finished")))
-        queue(null)
+        atomic {
+            messageQueue ::= FinishedMessage
+        }
+
         serverThread.join()
     }
     
@@ -183,10 +219,4 @@ class Logger extends DFLogger {
 
     def getWorkerName(): String =
         Thread.currentThread().getName()
-
-    def queue(message: String) {
-        atomic {
-            messageQueue ::= message
-        }
-    }
 }

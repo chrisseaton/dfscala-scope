@@ -67,6 +67,8 @@ function createWorkers(connection) {
         context.fillText(text, x - (m.width/2), y + (h/2) - 3);
     }
 
+    var diagramMode = false;
+
     function paint() {
         context = workersCanvas[0].getContext("2d");
 
@@ -87,10 +89,17 @@ function createWorkers(connection) {
             context.lineTo(t * wPerSecond, h);
         }
 
-        context.strokeStyle = "#babdb6";
+        if (diagramMode)
+            context.strokeStyle = "#000000";
+        else
+            context.strokeStyle = "#babdb6";
+
         context.stroke();
 
-        context.fillStyle = "#babdb6";
+        if (diagramMode)
+            context.fillStyle = "#000000";
+        else
+            context.fillStyle = "#babdb6";
 
         for (t = 1; t < maxFinishTime; t++) {
             context.fillText(String(t) + "s", t * wPerSecond + 2, h - 2);
@@ -118,6 +127,9 @@ function createWorkers(connection) {
                         var tw = duration * wPerSecond;
                         var th = workerH;
 
+                        if (tw < 5)
+                            return;
+
                         context.fillStyle = threadColours[thread];
                         context.fillRect(tx, ty, tw, th);
 
@@ -126,10 +138,10 @@ function createWorkers(connection) {
 
                         deferText.push(function() {
                             context.fillStyle = "#000000";
-                            drawTextAt(context, "#" + String(thread), tx + (tw/2), ty + (th/2) + 1, 10);
+                            drawTextAt(context, "#" + String(thread), tx + (tw/2), ty + (th/2) + 2, 10);
 
                             context.fillStyle = "#ffffff";
-                            drawTextAt(context, "#" + String(thread), tx + (tw/2), ty + (th/2) + 2, 10);
+                            drawTextAt(context, "#" + String(thread), tx + (tw/2), ty + (th/2) + 1, 10);
                         });
                     }
                 })(i);
@@ -140,9 +152,10 @@ function createWorkers(connection) {
             return f();
         }
 
-        context.font = "10px";
+        context.font = "bold 10px";
 
-        _.map(deferText, apply);
+        if (!diagramMode)
+            _.map(deferText, apply);
     }
 
     function sizeCanvas() {
@@ -157,6 +170,12 @@ function createWorkers(connection) {
 
     $(window).resize(sizeCanvas);
     sizeCanvas();
+
+    window.diagramShot = function() {
+        $("#workers div").removeClass("well");
+        diagramMode = true;
+        paint();
+    }
 
     connection.addListener(function(message) {
         switch (message.message) {

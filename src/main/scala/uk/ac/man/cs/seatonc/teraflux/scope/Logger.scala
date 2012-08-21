@@ -1,5 +1,7 @@
 package uk.ac.man.cs.seatonc.teraflux.scope
 
+import java.net.InetAddress
+
 import scala.util.Properties
 import scala.concurrent.SyncVar
 
@@ -143,8 +145,8 @@ class Logger extends DFLogger {
                 webServer.add(new ResourceHttpHandler("/client", classOf[Logger]))
                 webServer.add("/socket", webSocketHandler)
                 webServer.start()
-
-                System.err.println("scope: go to http://localhost:" + port + "/")
+                
+                System.err.println("scope: go to http://" + getHostName() + ":" + port + "/")
 
                 val webSocketConnection = webSocketConnectionVar.take()
 
@@ -219,4 +221,7 @@ class Logger extends DFLogger {
 
     def getWorkerName(): String =
         Thread.currentThread().getName()
+
+    def getHostName(): String =
+        InetAddress.getLocalHost().getHostName()
 }

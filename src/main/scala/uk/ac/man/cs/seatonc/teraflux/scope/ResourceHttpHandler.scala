@@ -21,8 +21,8 @@ class ResourceHttpHandler[T](prefix: String, klass: Class[T]) extends AbstractRe
 
         val requestPath = request.uri
 
-        val resource = if (requestPath == "/")
-            prefix + "/index.html"
+        val resource = if (requestPath.endsWith("/"))
+            prefix + requestPath + "index.html"
         else
             prefix + requestPath
 

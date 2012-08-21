@@ -1,3 +1,5 @@
+#!/bin/bash
+
 JAVA_OPTS="$JAVA_OPTS -javaagent:lib/muts_2.8-rv41.jar -Xmx4G -Xms4G" \
     scala -nobootcp \
     -classpath lib/*:`find lib_managed | grep .jar$ | xargs echo | tr ' ' ':'`:target/scala-2.9.1/classes:target/scala-2.9.1/test-classes \

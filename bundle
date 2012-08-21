@@ -1,0 +1,18 @@
+#!/bin/bash
+
+rm -f dfscala-scope_2.9.1-0.2-bundle.jar
+sbt package
+rm -rf jar
+mkdir jar
+cd jar
+unzip ../target/scala-2.9.1/dfscala-scope_2.9.1-0.2.jar > /dev/null
+rm -rf META-INF
+for f in `find ../lib_managed | grep .jar$`
+do
+	unzip $f > /dev/null
+	rm -rf META-INF
+done
+jar -cf dfscala-scope_2.9.1-0.2-bundle.jar *
+mv dfscala-scope_2.9.1-0.2-bundle.jar ..
+cd ..
+rm -rf jar

@@ -19,52 +19,54 @@ class ResourceHttpHandler[T](prefix: String, klass: Class[T]) extends AbstractRe
             response: HttpResponse,
             control: HttpControl) extends IOWorker(request.uri(), request, response, control) {
 
-        val file = getResource(request.uri)
+        val requestPath = request.uri
+
+        val resource = if (requestPath == "/")
+            prefix + "/index.html"
+        else
+            prefix + requestPath
+
+        val resourceExists = klass.getResource(resource) != null
 
         override protected def exists: Boolean =
-            file match {
-                case None => false
-                case Some(f) => f.exists
-            }
+            resourceExists
 
         override protected def isDirectory: Boolean =
-            file match {
-                case None => false
-                case Some(f) => f.isDirectory
-            }
+            false
 
         override protected def fileBytes: Array[Byte] =
-            file match {
-                case None => null
-                case Some(f) => {
-                    if (f.isFile)
-                        readResource(f)
-                    else
-                        null
-                }
-            }
+            if (exists)
+                readAll(klass.getResourceAsStream(resource))
+            else
+                null
 
         override protected def welcomeBytes: Array[Byte] =
-            readResource(new File(klass.getResource(prefix + "/index.html").getFile()))
+            null
 
         override protected def directoryListingBytes: Array[Byte] =
             null
 
-        def getResource(path: String) : Option[File] =
-            klass.getResource(prefix + path) match {
-                case null => None
-                case url => Some(new File(url.getFile))
+        def readAll(stream: InputStream): Array[Byte] = {
+            var buffer = new Array[Byte](0)
+            var offset = 0
+            var finished = false
+
+            while (!finished) {
+                if (buffer.length - offset == 0) {
+                    val newBuffer = new Array[Byte](buffer.length + 1024)
+                    System.arraycopy(buffer, 0, newBuffer, 0, buffer.length)
+                    buffer = newBuffer
+                }
+
+                stream.read(buffer, offset, buffer.length - offset) match {
+                    case -1 => finished = true
+                    case n => offset += n
+                }
             }
 
-        def readResource(resource: File): Array[Byte] = {
-            val bytes = new Array[Byte](resource.length.toInt)
-            val stream = new FileInputStream(resource)
-            try {
-                stream.read(bytes)
-            } finally {
-                stream.close()
-            }
-            bytes
+            val finalBuffer = new Array[Byte](offset)
+            System.arraycopy(buffer, 0, finalBuffer, 0, offset)
+            finalBuffer
         }
     }
 }

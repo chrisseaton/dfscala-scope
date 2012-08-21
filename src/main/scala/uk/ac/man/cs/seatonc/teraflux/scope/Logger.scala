@@ -223,5 +223,5 @@ class Logger extends DFLogger {
         Thread.currentThread().getName()
 
     def getHostName(): String =
-        InetAddress.getLocalHost().getHostName()
+        InetAddress.getLocalHost().getCanonicalHostName()
 }

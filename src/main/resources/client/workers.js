@@ -1,9 +1,6 @@
-function createWorkers(connection) {
+function createWorkers(connection, model) {
     var workersDiv = $("#workerscanvas");
     var workersCanvas = Raphael("workerscanvas", 100, 100);
-
-    var threadStartTimes = {};
-    var threadFinishTimes = {};
 
     var maxTime = 0;
 
@@ -18,8 +15,6 @@ function createWorkers(connection) {
     var threadColours = {};
 
     function onThreadStarted(message) {
-        threadStartTimes[message.thread] = message.time;
-
         var threads = workerThreads[message.worker];
 
         if (threads == undefined) {
@@ -40,8 +35,6 @@ function createWorkers(connection) {
     }
 
     function onThreadFinished(message) {
-        threadFinishTimes[message.thread] = message.time;
-
         if (message.time > maxTime)
             maxTime = message.time;
 
@@ -49,12 +42,6 @@ function createWorkers(connection) {
     }
 
     function onReset() {
-        for (thread in threadStartTimes)
-            delete threadStartTimes[thread];
-
-        for (thread in threadFinishTimes)
-            delete threadFinishTimes[thread];
-
         maxTime = 0;
 
         workers.length = 0;
@@ -106,8 +93,8 @@ function createWorkers(connection) {
             for (i = 0; i < threads.length; i++) {
                 var thread = threads[i];
 
-                var start = threadStartTimes[thread];
-                var finish = threadFinishTimes[thread];
+                var start = model.getStartTime(thread);
+                var finish = model.getFinishTime(thread);
 
                 var duration;
 
@@ -121,106 +108,17 @@ function createWorkers(connection) {
                 var tw = duration * wPerSecond;
                 var th = workerH;
 
-                var rect
+                var rect;
 
-                if (finish == undefined) {
-                    console.log("M" + String(tx) + "," + String(ty) + "l" + String(tw) + ",0l" + String(marginRight - 3) + "," + String(th / 2) + "l" + String(-(marginRight - 3)) + "," + String(-(th / 2)) + "l" + String(-tw) + ",0l0," + String(-th) + "Z");
+                if (finish == undefined)
                     rect = workersCanvas.path("M" + String(tx) + "," + String(ty) + "l" + String(tw) + ",0l" + String(marginRight - 3) + "," + String(th / 2) + "l" + String(-(marginRight - 3)) + "," + String(th / 2) + "l" + String(-tw) + ",0l0," + String(-th) + "Z");
-                } else
+                else
                     rect = workersCanvas.rect(tx, ty, tw, th);
 
                 rect.attr("fill", threadColours[thread]);
             }
         }
     }
-
-
-        /*context = workersCanvas[0].getContext("2d");
-
-        var w = workersCanvas[0].width;
-        var h = workersCanvas[0].height;
-
-        var gutter = 20;
-
-        var workerH = (h - gutter) / workers.length;
-        var wPerSecond = w / maxFinishTime;
-
-        context.clearRect(0, 0, w, h);
-
-        context.beginPath();
-        
-        for (t = 1; t < maxFinishTime; t++) {
-            context.moveTo(t * wPerSecond, 0);
-            context.lineTo(t * wPerSecond, h);
-        }
-
-        if (diagramMode)
-            context.strokeStyle = "#000000";
-        else
-            context.strokeStyle = "#babdb6";
-
-        context.stroke();
-
-        if (diagramMode)
-            context.fillStyle = "#000000";
-        else
-            context.fillStyle = "#babdb6";
-
-        for (t = 1; t < maxFinishTime; t++) {
-            context.fillText(String(t) + "s", t * wPerSecond + 2, h - 2);
-        }
-
-        var deferText = [];
-
-        for (n = 0; n < workers.length; n++) {
-            var worker = workers[n];
-            var threads = workerThreads[worker];
-
-            for (i = 0; i < threads.length; i++) {
-                (function(i) {
-                    var thread = threads[i];
-
-                    var start = threadStartTimes[thread];
-                    var finish = threadFinishTimes[thread];
-
-                    if (finish == undefined) {
-                    } else {
-                        var duration = finish - start;
-
-                        var tx = start * wPerSecond;
-                        var ty = n * workerH;
-                        var tw = duration * wPerSecond;
-                        var th = workerH;
-
-                        if (tw < 5)
-                            return;
-
-                        context.fillStyle = threadColours[thread];
-                        context.fillRect(tx, ty, tw, th);
-
-                        context.strokeStyle = "#000000";
-                        context.strokeRect(tx, ty, tw, th);
-
-                        deferText.push(function() {
-                            context.fillStyle = "#000000";
-                            drawTextAt(context, "#" + String(thread), tx + (tw/2), ty + (th/2) + 2, 10);
-
-                            context.fillStyle = "#ffffff";
-                            drawTextAt(context, "#" + String(thread), tx + (tw/2), ty + (th/2) + 1, 10);
-                        });
-                    }
-                })(i);
-            }
-        }
-
-        function apply(f) {
-            return f();
-        }
-
-        context.font = "bold 10px";
-
-        if (!diagramMode)
-            _.map(deferText, apply);*/
 
     function sizeCanvas() {
         workersCanvas.setSize(workersDiv.width(), workersDiv.height());

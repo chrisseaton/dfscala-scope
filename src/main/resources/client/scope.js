@@ -26,9 +26,10 @@ function createScope() {
 $(document).ready(function() {
     var scope = createScope();
     var connection = createConnection();
+    var model = createModel(connection);
     createConsole(scope, connection);
     createThreads(scope, connection);
-    createWorkers(connection);
+    createWorkers(connection, model);
 
     var hostInput = $("#host_input");
     var connectButton = $("#connect_button");

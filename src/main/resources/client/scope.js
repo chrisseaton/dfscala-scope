@@ -35,7 +35,8 @@ $(document).ready(function() {
     var exampleButton = $("#example_button");
     var resetButton = $("#reset_button");
 
-    hostInput.val(window.location.hostname);
+    if (window.location.hostname != "")
+        hostInput.val(window.location.hostname);
 
     connectButton.click(function () {
         hostInput.attr("disabled", "disabled");

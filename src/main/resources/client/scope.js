@@ -1,14 +1,22 @@
 function createScope() {
-    function formatThreadId(id) {
-        var node = $("<span>");
-        node.addClass("badge")
+    var highlighted = undefined;
 
-        if (id == 0) {
+    function formatThreadId(thread) {
+        var node = $("<span>");
+        node.addClass("badge");
+        node.addClass("thread");
+        node.addClass("thread" + String(thread));
+
+        if (thread == 0) {
             node.append("root")
         } else {
             node.append("#");
-            node.append(String(id));
+            node.append(String(thread));
         }
+
+        node.click(function() {
+            highlightThread(thread);
+        });
 
         return node;
     }
@@ -17,9 +25,19 @@ function createScope() {
         return time.toFixed(2) + "s";
     }
 
+    function highlightThread(thread) {
+        if (highlighted != undefined)
+            $(".thread" + String(highlighted)).removeClass("badge-warning");
+
+        $(".thread" + String(thread)).addClass("badge-warning");
+
+        highlighted = thread;
+    }
+
     return {
         formatThreadId: formatThreadId,
-        formatTime: formatTime
+        formatTime: formatTime,
+        highlightThread: highlightThread
     };
 }
 
@@ -29,7 +47,7 @@ $(document).ready(function() {
     var model = createModel(connection);
     createConsole(scope, connection);
     createThreads(scope, connection);
-    createWorkers(connection, model);
+    createWorkers(scope, connection, model);
 
     var hostInput = $("#host_input");
     var connectButton = $("#connect_button");

@@ -1,4 +1,4 @@
-function createWorkers(connection, model) {
+function createWorkers(scope, connection, model) {
     var workersDiv = $("#workerscanvas");
     var workersCanvas = Raphael("workerscanvas", 100, 100);
 
@@ -121,6 +121,7 @@ function createWorkers(connection, model) {
 
                 rect.baseColour = threadColours[thread];
                 rect.attr("fill", rect.baseColour);
+                rect.attr("cursor", "pointer");
 
                 threadRects[thread] = rect;
 
@@ -155,6 +156,10 @@ function createWorkers(connection, model) {
                             r.attr("fill", r.baseColour);
                             r.attr("stroke", "black");
                         });
+                    });
+
+                    rect.click(function() {
+                        scope.highlightThread(thread);
                     });
                 })(thread, rect);
             }

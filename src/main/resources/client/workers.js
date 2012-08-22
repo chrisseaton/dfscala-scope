@@ -14,6 +14,8 @@ function createWorkers(connection, model) {
 
     var threadColours = {};
 
+    var threadRects = {};
+
     function onThreadStarted(message) {
         var threads = workerThreads[message.worker];
 
@@ -83,6 +85,8 @@ function createWorkers(connection, model) {
         for (t = 1; t < maxTime; t++)
             var text = workersCanvas.text(t * wPerSecond + 5, h - marginBottom + 10, String(t) + "s")
 
+        threadRects = {};
+
         var set = workersCanvas.setFinish()
         set.attr("text-anchor", "start");
 
@@ -115,9 +119,52 @@ function createWorkers(connection, model) {
                 else
                     rect = workersCanvas.rect(tx, ty, tw, th);
 
-                rect.attr("fill", threadColours[thread]);
+                rect.baseColour = threadColours[thread];
+                rect.attr("fill", rect.baseColour);
+
+                threadRects[thread] = rect;
+
+                (function(thread, rect) {
+                    rect.hover(function() {
+                        var parent = model.getParent(thread);
+                        var children = model.getChildren(thread);
+                        var received = model.getReceived(thread);
+                        var sent = model.getSent(thread);
+
+                        var bright = _.uniq(_.flatten([thread, parent, children, received, sent]));
+                        var dim = _.difference(model.getThreads(), bright);
+
+                        _.each(dim, function(t) {
+                            var r = threadRects[t];
+                            r.attr("fill", fade(r.baseColour));
+                            r.attr("stroke", "#bbbbbb");
+                        });
+
+                        _.each(bright, function(t) {
+                            var r = threadRects[t];
+                            r.toFront();
+                        });
+
+                        _.each(_.flatten([parent, children]), function(t) {
+                            var r = threadRects[t];
+                            r.attr("fill", "#dddddd");
+                        });
+                    }, function() {
+                        _.each(model.getThreads(), function(t) {
+                            var r = threadRects[t];
+                            r.attr("fill", r.baseColour);
+                            r.attr("stroke", "black");
+                        });
+                    });
+                })(thread, rect);
             }
         }
+    }
+
+    function fade(colour) {
+        var rgb = Raphael.getRGB(colour);
+        var hsl = Raphael.rgb2hsl(rgb.r, rgb.g, rgb.b);
+        return Raphael.hsl(hsl.h, hsl.s / 2, hsl.l * 2);
     }
 
     function sizeCanvas() {

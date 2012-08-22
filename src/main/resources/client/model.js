@@ -1,4 +1,5 @@
 function createModel(connection) {
+    var threads = [];
     var parents = {};
     var children = {};
     var received = {};
@@ -7,7 +8,18 @@ function createModel(connection) {
     var finishTime = {};
 
     function onThreadCreated(message) {
+        threads.push(message.child);
+
         parents[message.child] = message.parent;
+
+        var c = children[message.parent];
+
+        if (c == undefined) {
+            c = [];
+            children[message.parent] = c;
+        }
+
+        c.push(message.child);
     }
 
     function onThreadStarted(message) {
@@ -39,6 +51,7 @@ function createModel(connection) {
     }
 
     function onReset() {
+        threads = [];
         parents = {};
         children = {};
         receeived = {};
@@ -70,6 +83,10 @@ function createModel(connection) {
                 break;
         }
     });
+
+    function getThreads() {
+        return threads;
+    }
 
     function getParent(thread) {
         return parents[thread];
@@ -111,6 +128,7 @@ function createModel(connection) {
     }
 
     return {
+        getThreads: getThreads,
         getParent: getParent,
         getChildren: getChildren,
         getReceived: getReceived,

@@ -7,7 +7,10 @@ function createThreads(scope, connection) {
     function onThreadCreated(message) {
         var tr = $("<tr>");
 
-        tr.append($("<td>").append(scope.formatThreadId(message.child)));
+        var main = scope.formatThreadId(message.child);
+        main.addClass("threadmain");
+        tr.append($("<td>").append(main));
+
         tr.append($("<td>").append(scope.formatThreadId(message.parent)));
         
         var received = $("<td>");

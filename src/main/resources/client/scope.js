@@ -31,6 +31,11 @@ function createScope() {
 
         $(".thread" + String(thread)).addClass("badge-warning");
 
+        // This is out of place, really - should be in threads.js
+
+        var firstThreadsBadge = $("#threads .thread" + String(thread) + ".threadmain")[0];
+        $("#threads .well").scrollTop(firstThreadsBadge.offsetParent.offsetTop);
+
         highlighted = thread;
     }
 

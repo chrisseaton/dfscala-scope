@@ -41,11 +41,24 @@ function createConnection() {
         if (host == "example") {
             var messages = exampleTrace;
 
-            for (n = 0; n < messages.length; n++) {
-                (function(n) {
-                    _.delay(function() { broadcast(messages[n]) }, 1500 + n * 100);
-                })(n);
+            function pushMessage(n, time) {
+                if (n == messages.length)
+                    return;
+
+                var message = messages[n];
+
+                var messageTime = message.time;
+
+                if (messageTime == undefined)
+                    messageTime = time;
+
+                _.delay(function() {
+                    broadcast(message);
+                    pushMessage(n + 1, messageTime);
+                }, (messageTime - time) * 1000)
             }
+
+            _.delay(function() { pushMessage(0, 0); }, 1000)
         } else {
             var webSocket = new WebSocket("ws://" + host + ":8080/socket");
 

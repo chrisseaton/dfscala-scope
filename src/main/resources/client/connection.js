@@ -52,10 +52,10 @@ function createConnection() {
                 if (messageTime == undefined)
                     messageTime = time;
 
-                //_.delay(function() {
+                _.delay(function() {
                     broadcast(message);
                     pushMessage(n + 1, messageTime);
-                //}, (messageTime - time) * 1000)
+                }, (messageTime - time) * 1000)
             }
 
             _.delay(function() { pushMessage(0, 0); }, 1000)

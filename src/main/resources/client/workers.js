@@ -1,11 +1,11 @@
 function createWorkers(connection) {
-    var workersDiv = $("#workers");
-    var workersCanvas = $("#workers canvas");
+    var workersDiv = $("#workerscanvas");
+    var workersCanvas = Raphael("workerscanvas", 100, 100);
 
     var threadStartTimes = {};
     var threadFinishTimes = {};
 
-    var maxFinishTime = 0;
+    var maxTime = 0;
 
     var workers = [];
     var workerThreads = {};
@@ -33,14 +33,17 @@ function createWorkers(connection) {
         threadColours[message.thread] = possibleColours[colourIndex % possibleColours.length];
         colourIndex++;
 
+        if (message.time > maxTime)
+            maxTime = message.time;
+
         paint();
     }
 
     function onThreadFinished(message) {
         threadFinishTimes[message.thread] = message.time;
 
-        if (message.time > maxFinishTime)
-            maxFinishTime = message.time;
+        if (message.time > maxTime)
+            maxTime = message.time;
 
         paint();
     }
@@ -52,7 +55,7 @@ function createWorkers(connection) {
         for (thread in threadFinishTimes)
             delete threadFinishTimes[thread];
 
-        maxFinishTime = 0;
+        maxTime = 0;
 
         workers.length = 0;
 
@@ -67,10 +70,72 @@ function createWorkers(connection) {
         context.fillText(text, x - (m.width/2), y + (h/2) - 3);
     }
 
-    var diagramMode = false;
-
     function paint() {
-        context = workersCanvas[0].getContext("2d");
+        var w = workersDiv.width();
+        var h = workersDiv.height();
+        
+        var marginTop = 5;
+        var marginLeft = 5;
+        var marginBottom = 20;
+        var marginRight = 30;
+
+        var workerH = (h - marginTop - marginBottom) / workers.length;
+        var wPerSecond = (w - marginLeft - marginRight) / maxTime;
+
+        workersCanvas.clear();
+
+        var path = "";
+
+        for (t = 1; t < maxTime; t++)
+            path += "M" + String(t * wPerSecond) + ",0L" + String(t * wPerSecond) + "," + String(h);
+
+        workersCanvas.path(path)
+
+        workersCanvas.setStart();
+
+        for (t = 1; t < maxTime; t++)
+            var text = workersCanvas.text(t * wPerSecond + 5, h - marginBottom + 10, String(t) + "s")
+
+        var set = workersCanvas.setFinish()
+        set.attr("text-anchor", "start");
+
+        for (n = 0; n < workers.length; n++) {
+            var worker = workers[n];
+            var threads = workerThreads[worker];
+
+            for (i = 0; i < threads.length; i++) {
+                var thread = threads[i];
+
+                var start = threadStartTimes[thread];
+                var finish = threadFinishTimes[thread];
+
+                var duration;
+
+                if (finish == undefined)
+                    duration = maxTime - start;
+                else
+                    duration = finish - start;
+
+                var tx = start * wPerSecond + marginLeft;
+                var ty = n * workerH + marginTop;
+                var tw = duration * wPerSecond;
+                var th = workerH;
+
+                var rect
+
+                if (finish == undefined) {
+                    console.log("M" + String(tx) + "," + String(ty) + "l" + String(tw) + ",0l" + String(marginRight - 3) + "," + String(th / 2) + "l" + String(-(marginRight - 3)) + "," + String(-(th / 2)) + "l" + String(-tw) + ",0l0," + String(-th) + "Z");
+                    rect = workersCanvas.path("M" + String(tx) + "," + String(ty) + "l" + String(tw) + ",0l" + String(marginRight - 3) + "," + String(th / 2) + "l" + String(-(marginRight - 3)) + "," + String(th / 2) + "l" + String(-tw) + ",0l0," + String(-th) + "Z");
+                } else
+                    rect = workersCanvas.rect(tx, ty, tw, th);
+
+                rect.attr("fill", threadColours[thread]);
+            }
+        }
+    }
+
+
+        /*context = workersCanvas[0].getContext("2d");
 
         var w = workersCanvas[0].width;
         var h = workersCanvas[0].height;
@@ -155,27 +220,15 @@ function createWorkers(connection) {
         context.font = "bold 10px";
 
         if (!diagramMode)
-            _.map(deferText, apply);
-    }
+            _.map(deferText, apply);*/
 
     function sizeCanvas() {
-        var w = workersDiv.width() - 40;
-        var h = workersDiv.height() - 40;
-
-        workersCanvas.attr("width", w);
-        workersCanvas.attr("height", h);
-
+        workersCanvas.setSize(workersDiv.width(), workersDiv.height());
         paint();
     }
 
     $(window).resize(sizeCanvas);
     sizeCanvas();
-
-    window.diagramShot = function() {
-        $("#workers div").removeClass("well");
-        diagramMode = true;
-        paint();
-    }
 
     connection.addListener(function(message) {
         switch (message.message) {

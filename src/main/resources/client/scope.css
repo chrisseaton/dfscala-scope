@@ -21,7 +21,7 @@
     -moz-box-sizing: border-box;
     box-sizing: border-box;
 
-    overflow: scroll;
+    overflow-y: scroll;
 }
 
 #console ol {
@@ -43,7 +43,7 @@
     -moz-box-sizing: border-box;
     box-sizing: border-box;
 
-    overflow: scroll;
+    overflow-y: scroll;
 }
 
 #threads table {

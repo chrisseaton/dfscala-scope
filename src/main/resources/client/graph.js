@@ -37,7 +37,8 @@ function createGraph(scope, connection, model) {
             for (var threadN = 0; threadN < group.length; threadN++) {
                 var thread = group[threadN];
 
-                var x = margin + threadN * (nodeWidth + margin);
+                var cellW = w / group.length;
+                var x = threadN * cellW + cellW / 2;
 
                 graphCanvas.rect(x, y, nodeWidth, nodeHeight);
 

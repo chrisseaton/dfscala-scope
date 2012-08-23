@@ -1,5 +1,6 @@
 $(document).ready(function() {
     var navbarDiv = $(".navbar");
+    var statsDiv = $("#stats");
     var consoleDiv = $("#console");
     var threadsDiv = $("#threads");
     var workersDiv = $("#workers");
@@ -8,7 +9,9 @@ $(document).ready(function() {
         var top = String(navbarDiv.height() + 10) + "px";
         var bottom = String(workersDiv.height() + 30) + "px";
 
-        consoleDiv.css("top", top);
+        statsDiv.css("top", top);
+
+        consoleDiv.css("top", String(navbarDiv.height() + 10 + statsDiv.height() + 10) + "px");
         consoleDiv.css("bottom", bottom);
 
         threadsDiv.css("top", top);

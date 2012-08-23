@@ -55,6 +55,7 @@ $(document).ready(function() {
     var scope = createScope();
     var connection = createConnection();
     var model = createModel(connection);
+    createStats(connection, model);
     createConsole(scope, connection);
     createThreads(scope, connection);
     createWorkers(scope, connection, model);

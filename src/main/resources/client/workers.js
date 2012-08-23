@@ -2,9 +2,6 @@ function createWorkers(scope, connection, model) {
     var workersDiv = $("#workerscanvas");
     var workersCanvas = Raphael("workerscanvas", 100, 100);
 
-    var maxTime = 0;
-
-    var workers = [];
     var workerThreads = {};
 
     var possibleColours = ["#edd400", "#f57900", "#c17d11", "#73d216",
@@ -22,7 +19,6 @@ function createWorkers(scope, connection, model) {
         if (threads == undefined) {
             threads = [];
             workerThreads[message.worker] = threads;
-            workers.push(message.worker);
         }
 
         threads.push(message.thread);
@@ -30,16 +26,10 @@ function createWorkers(scope, connection, model) {
         threadColours[message.thread] = possibleColours[colourIndex % possibleColours.length];
         colourIndex++;
 
-        if (message.time > maxTime)
-            maxTime = message.time;
-
         paint();
     }
 
     function onThreadFinished(message) {
-        if (message.time > maxTime)
-            maxTime = message.time;
-
         paint();
     }
 
@@ -49,6 +39,9 @@ function createWorkers(scope, connection, model) {
     }
 
     function paint() {
+        var workers = model.getWorkers();
+        var maxTime = model.getMaxTime();
+
         var w = workersDiv.width();
         var h = workersDiv.height();
         

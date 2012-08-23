@@ -6,6 +6,9 @@ function createModel(connection) {
     var sent = {};
     var startTime = {};
     var finishTime = {};
+    var workers = [];
+
+    var maxTime = 0;
 
     function onThreadCreated(message) {
         threads.push(message.child);
@@ -24,10 +27,19 @@ function createModel(connection) {
 
     function onThreadStarted(message) {
         startTime[message.thread] = message.time;
+
+        if (!_.include(workers, message.worker))
+            workers.push(message.worker);
+
+        if (message.time > maxTime)
+            maxTime = message.time;
     }
 
     function onThreadFinished(message) {
         finishTime[message.thread] = message.time;
+
+        if (message.time > maxTime)
+            maxTime = message.time;
     }
 
     function onTokenPassed(message) {
@@ -113,6 +125,14 @@ function createModel(connection) {
         return finishTime[thread];
     }
 
+    function getWorkers() {
+        return workers;
+    }
+
+    function getMaxTime() {
+        return maxTime;
+    }
+
     return {
         getThreads: getThreads,
         getParent: getParent,
@@ -120,6 +140,8 @@ function createModel(connection) {
         getReceived: getReceived,
         getSent: getSent,
         getStartTime: getStartTime,
-        getFinishTime: getFinishTime
+        getFinishTime: getFinishTime,
+        getWorkers: getWorkers,
+        getMaxTime: getMaxTime
     };
 }

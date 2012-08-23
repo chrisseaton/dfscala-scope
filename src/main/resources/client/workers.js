@@ -148,8 +148,11 @@ function createWorkers(scope, connection, model) {
                     }, function() {
                         _.each(model.getThreads(), function(t) {
                             var r = threadRects[t];
-                            r.attr("fill", r.baseColour);
-                            r.attr("stroke", "black");
+                            
+                            if (r != null) {
+                                r.attr("fill", r.baseColour);
+                                r.attr("stroke", "black");
+                            }
                         });
                     });
 

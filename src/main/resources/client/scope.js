@@ -33,8 +33,13 @@ function createScope() {
 
         // This is out of place, really - should be in threads.js
 
-        var firstThreadsBadge = $("#threads .thread" + String(thread) + ".threadmain")[0];
-        $("#threads .well").scrollTop(firstThreadsBadge.offsetParent.offsetTop);
+        var firstThreadBadge = $("#threads .thread" + String(thread) + ".threadmain")[0];
+        var firstThreadBadgeRow = firstThreadBadge.offsetParent;
+
+        var container = $("#threads .well");
+
+        if (firstThreadBadgeRow.offsetTop < container.scrollTop() || firstThreadBadgeRow.offsetTop > container.scrollTop() + container.height())
+            container.scrollTop(firstThreadBadgeRow.offsetTop);
 
         highlighted = thread;
     }

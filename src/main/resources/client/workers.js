@@ -145,11 +145,6 @@ function createWorkers(scope, connection, model) {
                             var r = threadRects[t];
                             r.toFront();
                         });
-
-                        _.each(_.flatten([parent, children]), function(t) {
-                            var r = threadRects[t];
-                            r.attr("fill", "#dddddd");
-                        });
                     }, function() {
                         _.each(model.getThreads(), function(t) {
                             var r = threadRects[t];

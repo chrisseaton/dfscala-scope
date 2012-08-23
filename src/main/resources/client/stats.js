@@ -2,7 +2,7 @@ function createStats(connection, model) {
     var utilPc = $("#stats .util .pc");
     var utilBar = $("#stats .util .prog .progress .bar");
 
-    function update() {
+    var update = _.throttle(function() {
         var util = calcUtil();
         var utilPercentage = (util * 100).toFixed(2) + "%";
         
@@ -10,7 +10,7 @@ function createStats(connection, model) {
         utilPc.append(utilPercentage);
 
         utilBar.css("width", utilPercentage);
-    }
+    }, 250);
 
     function calcUtil() {
         var times = _.map(model.getThreads(), function(thread) {

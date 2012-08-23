@@ -38,7 +38,7 @@ function createWorkers(scope, connection, model) {
         context.fillText(text, x - (m.width/2), y + (h/2) - 3);
     }
 
-    function paint() {
+    var paint = _.throttle(function() {
         var workers = model.getWorkers();
         var maxTime = model.getMaxTime();
 
@@ -144,7 +144,7 @@ function createWorkers(scope, connection, model) {
                 })(thread, rect);
             }
         }
-    }
+    }, 250);
 
     function fade(colour) {
         var rgb = Raphael.getRGB(colour);

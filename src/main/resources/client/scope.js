@@ -58,7 +58,7 @@ $(document).ready(function() {
     createStats(connection, model);
     createConsole(scope, connection);
     createThreads(scope, connection);
-    createGraph(scope, connection);
+    createGraph(scope, connection, model);
     createWorkers(scope, connection, model);
 
     var hostInput = $("#host_input");

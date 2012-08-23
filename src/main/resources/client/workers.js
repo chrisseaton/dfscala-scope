@@ -26,11 +26,11 @@ function createWorkers(scope, connection, model) {
         threadColours[message.thread] = possibleColours[colourIndex % possibleColours.length];
         colourIndex++;
 
-        paint();
+        update();
     }
 
     function onThreadFinished(message) {
-        paint();
+        update();
     }
 
     function drawTextAt(context, text, x, y, h) {
@@ -38,7 +38,7 @@ function createWorkers(scope, connection, model) {
         context.fillText(text, x - (m.width/2), y + (h/2) - 3);
     }
 
-    var paint = _.throttle(function() {
+    var update = _.throttle(function() {
         var workers = model.getWorkers();
         var maxTime = model.getMaxTime();
 
@@ -119,18 +119,20 @@ function createWorkers(scope, connection, model) {
 
                         _.each(dim, function(t) {
                             var r = threadRects[t];
-                            r.attr("fill", fade(r.baseColour));
-                            r.attr("stroke", "#bbbbbb");
+                            if (r != null) {
+                                r.attr("fill", fade(r.baseColour));
+                                r.attr("stroke", "#bbbbbb");
+                            }
                         });
 
                         _.each(bright, function(t) {
                             var r = threadRects[t];
-                            r.toFront();
+                            if (r != null)
+                                r.toFront();
                         });
                     }, function() {
                         _.each(model.getThreads(), function(t) {
                             var r = threadRects[t];
-                            
                             if (r != null) {
                                 r.attr("fill", r.baseColour);
                                 r.attr("stroke", "black");
@@ -154,7 +156,7 @@ function createWorkers(scope, connection, model) {
 
     function sizeCanvas() {
         workersCanvas.setSize(workersDiv.width(), workersDiv.height());
-        paint();
+        update();
     }
 
     $(window).resize(sizeCanvas);

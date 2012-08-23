@@ -18,6 +18,7 @@
 #console .well {
     width: 100%;
     height: 100%;
+    -moz-box-sizing: border-box;
     box-sizing: border-box;
 
     overflow: scroll;
@@ -39,6 +40,7 @@
 #threads .well {
     width: 100%;
     height: 100%;
+    -moz-box-sizing: border-box;
     box-sizing: border-box;
 
     overflow: scroll;
@@ -59,6 +61,7 @@
 #workers .well {
     width: 100%;
     height: 100%;
+    -moz-box-sizing: border-box;
     box-sizing: border-box;
 }
 

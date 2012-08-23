@@ -20,11 +20,20 @@ function createConnection() {
         listeners.push(listener);
     }
 
+    var messageQueue = [];
+
     function broadcast(message) {
-        _.map(listeners, function(listener) {
-            listener(message)
-        })
+        messageQueue.push(message);
+        broadcastQueue();
     }
+
+    var broadcastQueue = _.throttle(function() {
+        _.map(messageQueue, function(message) {
+            _.map(listeners, function(listener) { listener(message); });
+        });
+
+        messageQueue.length = 0;
+    }, 250);
 
     function info(message) {
         broadcast({message: 'info', text: message});

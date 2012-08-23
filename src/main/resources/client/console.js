@@ -2,11 +2,6 @@ function createConsole(scope, connection) {
     var consoleList = $("#console ol");
 
     connection.addListener(function(message) {
-        if (message.message == 'reset') {
-            consoleList.empty();
-            return;
-        }
-
         var li = $("<li>");
 
         switch (message.message) {

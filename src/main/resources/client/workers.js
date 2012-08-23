@@ -43,17 +43,6 @@ function createWorkers(scope, connection, model) {
         paint();
     }
 
-    function onReset() {
-        maxTime = 0;
-
-        workers.length = 0;
-
-        for (thread in workerThreads)
-            delete workerThreads[thread];
-
-        paint();
-    }
-
     function drawTextAt(context, text, x, y, h) {
         var m = context.measureText(text);
         context.fillText(text, x - (m.width/2), y + (h/2) - 3);
@@ -186,10 +175,6 @@ function createWorkers(scope, connection, model) {
 
             case 'thread-finished':
                 onThreadFinished(message);
-                break;
-
-            case 'reset':
-                onReset();
                 break;
         }
     });

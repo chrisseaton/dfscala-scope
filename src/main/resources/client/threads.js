@@ -107,13 +107,6 @@ function createThreads(scope, connection) {
         entry.state.append($("<span>").addClass("badge").addClass("badge-info").append("finished"));
     }
 
-    function onReset() {
-        for (thread in perThread)
-            delete perThread[thread];
-
-        threadsTableBody.empty();
-    }
-
     connection.addListener(function(message) {
         switch (message.message) {
             case 'thread-created':
@@ -130,10 +123,6 @@ function createThreads(scope, connection) {
 
             case 'thread-finished':
                 onThreadFinished(message);
-                break;
-
-            case 'reset':
-                onReset();
                 break;
         }
     });

@@ -14,7 +14,6 @@ function createConnection() {
             {message: 'token-passed', from: i, to: i, arg: n, time: t}
             {message: 'thread-started', thread: i, worker: w, time: t}
             {message: 'thread-finished', thread: i, time: t}
-            {message: 'reset'}
     */
 
     function addListener(listener) {
@@ -68,22 +67,11 @@ function createConnection() {
                 if (object.message != undefined)
                     broadcast(object)
             }
-
-            addListener(function(message) {
-                if (message.message == 'reset') {
-                    webSocket.disconnect
-                }
-            });
         }
-    }
-
-    function reset() {
-        broadcast({message: 'reset'});
     }
 
     return {
         addListener: addListener,
-        connect: connect,
-        reset: reset
+        connect: connect
     };
 }

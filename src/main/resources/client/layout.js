@@ -1,12 +1,12 @@
 $(document).ready(function() {
-    var headerDiv = $("#header");
+    var navbarDiv = $(".navbar");
     var consoleDiv = $("#console");
     var threadsDiv = $("#threads");
     var workersDiv = $("#workers");
 
     function layout() {
-        var top = String(headerDiv.height() + 10) + "px";
-        var bottom = String(workersDiv.height() + 20) + "px";
+        var top = String(navbarDiv.height() + 10) + "px";
+        var bottom = String(workersDiv.height() + 30) + "px";
 
         consoleDiv.css("top", top);
         consoleDiv.css("bottom", bottom);

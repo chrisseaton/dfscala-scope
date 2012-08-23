@@ -50,16 +50,6 @@ function createModel(connection) {
         s.push(message.to);
     }
 
-    function onReset() {
-        threads = [];
-        parents = {};
-        children = {};
-        receeived = {};
-        sent = {};
-        startTime = {};
-        endTime = {};
-    }
-
     connection.addListener(function(message) {
         switch (message.message) {
             case 'thread-created':
@@ -76,10 +66,6 @@ function createModel(connection) {
 
             case 'thread-finished':
                 onThreadFinished(message);
-                break;
-
-            case 'reset':
-                onReset();
                 break;
         }
     });

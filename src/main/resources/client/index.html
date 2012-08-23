@@ -27,13 +27,15 @@
 
 <body>
 
-<div id="header">
-    <div class="inner">
-        <form class="form-search">
-            <input type="text" id="host_input" class="input-large search-query" value="localhost">
+<div class="container">
+
+<div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+        <span class="brand">DFScala Scope</span>
+        <form class="navbar-form">
+            <input type="text" id="host_input" class="input-large" value="localhost">
             <button type="button" id="connect_button" class="btn btn-primary">Connect</button>
-            <button type="button" id="example_button" class="btn btn-info">Example</button>
-            <button type="button" id="reset_button" class="btn" disabled="disabled">Reset</button>
+            <button type="button" id="example_button" class="btn">Example</button>
         </form>
     </div>
 </div>
@@ -71,6 +73,8 @@
     <div class="well">
         <div id="workerscanvas"></div>
     </div>
+</div>
+
 </div>
 
 </body>

@@ -58,14 +58,35 @@ $(document).ready(function() {
     createStats(connection, model);
     createConsole(scope, connection);
     createThreads(scope, connection);
+    createGraph(scope, connection);
     createWorkers(scope, connection, model);
 
     var hostInput = $("#host_input");
-    var connectButton = $("#connect_button");
-    var exampleButton = $("#example_button");
 
     if (window.location.hostname != "")
         hostInput.val(window.location.hostname);
+
+    var connectButton = $("#connect_button");
+    var exampleButton = $("#example_button");
+
+    var tableButton = $("#table_button");
+    var graphButton = $("#graph_button");
+
+    tableButton.click(function() {
+        tableButton.addClass("active");
+        graphButton.removeClass("active");
+        $("#threads").css("z-index", "1");
+        $("#graph").css("z-index", "0");
+    });
+
+    graphButton.click(function() {
+        tableButton.removeClass("active");
+        graphButton.addClass("active");
+        $("#threads").css("z-index", "0");
+        $("#graph").css("z-index", "1");
+    });
+
+    tableButton.click();
 
     connectButton.click(function () {
         hostInput.attr("disabled", "disabled");

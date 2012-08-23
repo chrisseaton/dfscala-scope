@@ -3,6 +3,7 @@ $(document).ready(function() {
     var statsDiv = $("#stats");
     var consoleDiv = $("#console");
     var threadsDiv = $("#threads");
+    var graphDiv = $("#graph");
     var workersDiv = $("#workers");
 
     function layout() {
@@ -16,6 +17,9 @@ $(document).ready(function() {
 
         threadsDiv.css("top", top);
         threadsDiv.css("bottom", bottom);
+
+        graphDiv.css("top", top);
+        graphDiv.css("bottom", bottom);
     }
 
     $(window).resize(layout);

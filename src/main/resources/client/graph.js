@@ -22,8 +22,11 @@ function createGraph(scope, connection, model) {
         var nodeXCount = _.max(_.map(groups, function(g) { return g.length; }));
         var nodeYCount = groups.length;
 
-        var nodeWidth = (w - margin) / (nodeXCount + margin);
-        var nodeHeight = (h - margin) / (nodeYCount + margin * 4);
+        var nodeCellWidth = (w - 2 * margin) / nodeXCount;
+        var nodeCellHeight = (h - 2 * margin) / nodeYCount;
+
+        var nodeWidth = 0.75 * nodeCellWidth;
+        var nodeHeight = (1/3) * nodeCellHeight;
 
         graphCanvas.clear();
 
@@ -32,13 +35,13 @@ function createGraph(scope, connection, model) {
         for (var groupN = 0; groupN < groups.length; groupN++) {
             var group = groups[groupN];
 
-            var y = margin + groupN * (nodeHeight + margin * 4);
+            var y = margin + groupN * nodeCellHeight;
 
             for (var threadN = 0; threadN < group.length; threadN++) {
                 var thread = group[threadN];
 
-                var cellW = w / group.length;
-                var x = threadN * cellW + cellW / 2;
+                var rowNodeCellWidth = (w - 2 * margin) / group.length;
+                var x = threadN * rowNodeCellWidth + rowNodeCellWidth / 2 - nodeWidth / 2;
 
                 graphCanvas.rect(x, y, nodeWidth, nodeHeight);
 
@@ -75,6 +78,7 @@ function createGraph(scope, connection, model) {
     connection.addListener(function(message) {
         switch (message.message) {
             case 'thread-created':
+            case 'token-passed':
                 update();
                 break;
         }

@@ -1,6 +1,6 @@
 function createModel(connection) {
-    var threads = [];
-    var parents = {};
+    var threads = [0];
+    var parents = {0: undefined};
     var children = {};
     var received = {};
     var sent = {};

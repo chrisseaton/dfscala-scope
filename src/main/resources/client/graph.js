@@ -4,12 +4,20 @@ function createGraph(scope, connection, model) {
 
     var update = _.throttle(function() {
         var threads = model.getThreads();
-        var previous = [0];
 
+        var before = {};
+
+        _.each(threads, function(thread) {
+            var parent = model.getParent(thread);
+            var received = model.getReceived(thread);
+            before[thread] = _.uniq(_.without(_.flatten([parent, received]), undefined));
+        });
+
+        var previous = [];
         var groups = [];
 
         while (previous.length < threads.length) {
-            var group = nextGroup(threads, previous);
+            var group = nextGroup(threads, previous, before);
             groups.push(group);
             _.each(group, function(t) { previous.push(t) } );
         }
@@ -30,40 +38,64 @@ function createGraph(scope, connection, model) {
 
         graphCanvas.clear();
 
-        var edgeOut = {};
+        var edgesOut = {};
 
         for (var groupN = 0; groupN < groups.length; groupN++) {
             var group = groups[groupN];
 
             var y = margin + groupN * nodeCellHeight;
 
-            for (var threadN = 0; threadN < group.length; threadN++) {
-                var thread = group[threadN];
+            var threadWeights = {};
 
-                var rowNodeCellWidth = (w - 2 * margin) / group.length;
+            _.each(group, function(thread) {
+                var threadBefore = before[thread];
+                threadWeights[thread] = median(_.map(threadBefore, function(b) { return edgesOut[b].x }));
+            });
+
+            var sortedGroup = _.sortBy(group, function(t) { return threadWeights[t]; });
+
+            for (var threadN = 0; threadN < sortedGroup.length; threadN++) {
+                var thread = sortedGroup[threadN];
+
+                var rowNodeCellWidth = (w - 2 * margin) / sortedGroup.length;
                 var x = threadN * rowNodeCellWidth + rowNodeCellWidth / 2 - nodeWidth / 2;
 
                 graphCanvas.rect(x, y, nodeWidth, nodeHeight);
 
-                var edgeIn = "L" + String(x + nodeWidth / 2) + "," + String(y);
+                var edgeIn = {x: x + nodeWidth / 2, y: y};
 
-                var threadsIn = _.uniq(_.flatten([model.getParent(thread), model.getReceived(thread)]));
-
-                _.each(threadsIn, function(threadIn) {
-                    graphCanvas.path(edgeOut[threadIn] + edgeIn);
+                _.each(before[thread], function(threadIn) {
+                    var out = edgesOut[threadIn];
+                    graphCanvas.path("M" + String(out.x) + "," + String(out.y) + "L" + String(edgeIn.x) + "," + String(edgeIn.y));
                 });
 
-                edgeOut[thread] = "M" + String(x + nodeWidth / 2) + "," + String(y + nodeHeight);
+                edgesOut[thread] = {x: x + nodeWidth / 2, y : y + nodeHeight};
             }
         }
     }, 250);
 
-    function nextGroup(threads, previous) {
+    function sum(l) {
+        return _.reduce(l, function(a, b) { return a + b; }, 0);
+    }
+
+    function mean(l) {
+        return sum(l) / l.length;
+    }
+
+    function median(l) {
+        var m = Math.floor(l.length / 2);
+
+        if (l.length % 2 == 0)
+            return mean([l[m], l[m + 1]]);
+        else
+            return l[m];
+    }
+
+    function nextGroup(threads, previous, before) {
         var remaining = _.difference(threads, previous);
 
         return _.filter(remaining, function(thread) {
-            var before = _.flatten([model.getParent(thread), model.getReceived(thread)]);
-            return _.all(before, function(b) { return _.include(previous, b) } );
+            return _.all(before[thread], function(b) { return _.include(previous, b) } );
         });
     }
 

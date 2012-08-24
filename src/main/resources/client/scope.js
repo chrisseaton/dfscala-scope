@@ -1,18 +1,19 @@
 function createScope() {
     var highlighted = undefined;
 
+    function formatThreadIdString(thread) {
+        if (thread == 0)
+            return "root";
+        else
+            return "#" + String(thread);
+    }
+
     function formatThreadId(thread) {
         var node = $("<span>");
+        node.append(formatThreadIdString(thread));
         node.addClass("badge");
         node.addClass("thread");
         node.addClass("thread" + String(thread));
-
-        if (thread == 0) {
-            node.append("root")
-        } else {
-            node.append("#");
-            node.append(String(thread));
-        }
 
         node.click(function() {
             highlightThread(thread);
@@ -45,6 +46,7 @@ function createScope() {
     }
 
     return {
+        formatThreadIdString: formatThreadIdString,
         formatThreadId: formatThreadId,
         formatTime: formatTime,
         highlightThread: highlightThread

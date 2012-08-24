@@ -40,7 +40,7 @@ function createGraph(scope, connection, model) {
         var nodeCellHeight = (h - 2 * margin) / nodeYCount;
 
         var nodeWidth = 0.75 * nodeCellWidth;
-        var nodeHeight = (1/3) * nodeCellHeight;
+        var nodeHeight = 0.5 * nodeCellHeight;
 
         graphCanvas.clear();
 
@@ -68,6 +68,12 @@ function createGraph(scope, connection, model) {
 
                 var node = graphCanvas.rect(x, y, nodeWidth, nodeHeight);
                 node.attr("fill", stateColour[model.getState(thread)]);
+
+                var shadow = graphCanvas.text(x + nodeWidth / 2, y + nodeHeight / 2 - 1, scope.formatThreadIdString(thread));
+                shadow.attr("opacity", "0.5");
+
+                var label = graphCanvas.text(x + nodeWidth / 2, y + nodeHeight / 2, scope.formatThreadIdString(thread));
+                label.attr("fill", "white");
 
                 var edgeIn = {x: x + nodeWidth / 2, y: y};
 

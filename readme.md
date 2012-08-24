@@ -49,3 +49,10 @@ Run your DFScala program using:
     -Deu.teraflux.uniman.dataflow.logger=uk.ac.man.cs.seatonc.teraflux.scope.Logger
 
 It will prompt you to open your browser and connect.
+
+Caveats
+-------
+
+Java does not always successfuly determine your hostname. If you are using it
+on your local machine and the link it gives you does not work try
+http://localhost:8080/ instead.

@@ -9,6 +9,7 @@ function createModel(connection) {
     var workers = [];
 
     var maxTime = 0;
+    var finished = false;
 
     function onThreadCreated(message) {
         threads.push(message.child);
@@ -79,6 +80,10 @@ function createModel(connection) {
             case 'thread-finished':
                 onThreadFinished(message);
                 break;
+
+            case 'finished':
+                finished = true;
+                break;
         }
     });
 
@@ -125,6 +130,22 @@ function createModel(connection) {
         return finishTime[thread];
     }
 
+    function getState(thread) {
+        if (thread == 0) {
+            if (finished)
+                return "finished";
+            else
+                return "running";
+        } else {
+            if (startTime[thread] == undefined)
+                return "waiting";
+            else if (finishTime[thread] == undefined)
+                return "running";
+            else
+                return "finished";
+        }
+    }
+
     function getWorkers() {
         return workers;
     }
@@ -141,6 +162,7 @@ function createModel(connection) {
         getSent: getSent,
         getStartTime: getStartTime,
         getFinishTime: getFinishTime,
+        getState: getState,
         getWorkers: getWorkers,
         getMaxTime: getMaxTime
     };

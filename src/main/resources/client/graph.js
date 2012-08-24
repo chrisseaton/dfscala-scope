@@ -2,6 +2,12 @@ function createGraph(scope, connection, model) {
     var graphDiv = $("#graphcanvas");
     var graphCanvas = Raphael("graphcanvas", 100, 100);
 
+    var stateColour = {
+        waiting: "#F89406",
+        running: "#468847",
+        finished: "#3A87AD"
+    }
+
     var update = _.throttle(function() {
         var threads = model.getThreads();
 
@@ -60,7 +66,8 @@ function createGraph(scope, connection, model) {
                 var rowNodeCellWidth = (w - 2 * margin) / sortedGroup.length;
                 var x = threadN * rowNodeCellWidth + rowNodeCellWidth / 2 - nodeWidth / 2;
 
-                graphCanvas.rect(x, y, nodeWidth, nodeHeight);
+                var node = graphCanvas.rect(x, y, nodeWidth, nodeHeight);
+                node.attr("fill", stateColour[model.getState(thread)]);
 
                 var edgeIn = {x: x + nodeWidth / 2, y: y};
 
@@ -110,7 +117,9 @@ function createGraph(scope, connection, model) {
     connection.addListener(function(message) {
         switch (message.message) {
             case 'thread-created':
+            case 'thread-started':
             case 'token-passed':
+            case 'thread-finished':
                 update();
                 break;
         }

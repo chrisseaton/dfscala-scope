@@ -10,7 +10,9 @@ like a scope than a graphical debugger.
 Who wrote this?
 ---------------
 
-Chris Seaton, seatonc@cs.man.ac.uk
+Chris Seaton, seatonc@cs.man.ac.uk.
+
+See licence.txt.
 
 Dependencies
 ------------
@@ -19,9 +21,7 @@ Dependencies
 *   SBT 0.11
 *   Modern browser (latest Safari, Chrome, Firefox work)
 
-Other dependencies are included in lib or lib_managed. If you are compiling
-within the DFScala SVN repository, it will link to MUTS and DFLib JARs within
-the repository.
+Other dependencies are included in lib or lib_managed.
 
 Compiling
 ---------

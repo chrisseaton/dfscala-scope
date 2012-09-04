@@ -7,6 +7,8 @@ What is this?
 This is a debugging tool for DFScala applications. It's read-only so it's more
 like a scope than a graphical debugger.
 
+![DFScala Scope Screenshot](http://github.com/chrisseaton/dfscala-scope/raw/master/other/screenshot.png)
+
 Who wrote this?
 ---------------
 

@@ -48,7 +48,7 @@ Using
 
 Run your DFScala program using:
 
-    -Deu.teraflux.uniman.dataflow.logger=uk.ac.man.cs.seatonc.teraflux.scope.Logger
+    -Deu.teraflux.uniman.dataflow.logger=eu.teraflux.uniman.dataflow.scope.Logger
 
 It will prompt you to open your browser and connect.
 

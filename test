@@ -3,5 +3,5 @@
 scala -nobootcp \
     -classpath lib/*:`find lib_managed | grep .jar$ | xargs echo | tr ' ' ':'`:target/scala-2.9.1/classes:target/scala-2.9.1/test-classes \
     -howtorun:object \
-    -Deu.teraflux.uniman.dataflow.logger=uk.ac.man.cs.seatonc.teraflux.scope.Logger \
-    uk.ac.man.cs.seatonc.teraflux.scope.Example
+    -Deu.teraflux.uniman.dataflow.logger=eu.teraflux.uniman.dataflow.scope.Logger \
+    eu.teraflux.uniman.dataflow.scope.Example

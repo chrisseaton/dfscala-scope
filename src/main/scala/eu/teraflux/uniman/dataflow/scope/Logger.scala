@@ -27,7 +27,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-package uk.ac.man.cs.seatonc.teraflux.scope
+package eu.teraflux.uniman.dataflow.scope
 
 import java.net.InetAddress
 

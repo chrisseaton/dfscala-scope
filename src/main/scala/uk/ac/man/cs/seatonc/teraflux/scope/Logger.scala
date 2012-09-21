@@ -37,7 +37,6 @@ import scala.concurrent.SyncVar
 import com.codahale.jerkson.Json._
 import org.webbitserver._
 
-import eu.teraflux.uniman.transactions.TMLib._
 import eu.teraflux.uniman.dataflow._
 
 class Logger extends DFLogger {
@@ -96,13 +95,13 @@ class Logger extends DFLogger {
     }
 
     def threadCreated(child:DFThread, parent:DFThread) {
-        atomic {
+        messageQueue.synchronized {
             messageQueue ::= ThreadCreatedMessage(parent.logID, child.logID, getTime())
         }
     }
 
     def threadCreated(child:DFThread, manager:DFManager) {
-        atomic {
+        messageQueue.synchronized {
             messageQueue ::= ThreadCreatedMessage(0, child.logID, getTime())
         }
     }
@@ -112,13 +111,13 @@ class Logger extends DFLogger {
     }
     
     def tokenPassed(from:DFThread, to:DFThread, argNo:Int) {
-        atomic {
+        messageQueue.synchronized {
             messageQueue ::= TokenPassedMessage(from.logID, to.logID, argNo, getTime())
         }
     }
     
     def tokenPassed(from:DFManager, to:DFThread, argNo:Int) {
-        atomic {
+        messageQueue.synchronized {
             messageQueue ::= TokenPassedMessage(0, to.logID, argNo, getTime())
         }
     }
@@ -128,13 +127,13 @@ class Logger extends DFLogger {
     }
     
     def threadStarted(thread:DFThread) {
-        atomic {
+        messageQueue.synchronized {
             messageQueue ::= ThreadStartedMessage(thread.logID, getWorkerName(), getTime())
         }
     }
     
     def threadFinished(thread:DFThread) {
-        atomic {
+        messageQueue.synchronized {
             messageQueue ::= ThreadFinishedMessage(thread.logID, getTime())
         }
     }
@@ -179,7 +178,7 @@ class Logger extends DFLogger {
 
                 val webSocketConnection = webSocketConnectionVar.take()
 
-                atomic {
+                messageQueue.synchronized {
                     messageQueue ::= ConnectedMessage
                 }
 
@@ -188,7 +187,7 @@ class Logger extends DFLogger {
                 var finished = false
 
                 while (!finished) {
-                    val messages = atomic {
+                    val messages = messageQueue.synchronized {
                         val temp = messageQueue
                         messageQueue = Nil
                         temp
@@ -220,7 +219,7 @@ class Logger extends DFLogger {
     }
     
     def managerFinish(manager:DFManager) {
-        atomic {
+        messageQueue.synchronized {
             messageQueue ::= FinishedMessage
         }
 
@@ -228,14 +227,14 @@ class Logger extends DFLogger {
     }
     
     def getThreadID:Int =
-        atomic {
+        synchronized {
             val id = nextThreadId
             nextThreadId += 1
             id
         }
     
     def getManagerID:Int =
-        atomic {
+        synchronized {
             val id = nextManagerId
             nextManagerId += 1
             id

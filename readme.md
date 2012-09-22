@@ -28,13 +28,11 @@ Other dependencies are included in lib or lib_managed.
 Compiling
 ---------
 
-If you are compiling within the DFScala SVN repository, you will need to build
-DFScala first.
-
     sbt compile
 
 To create a single Jar with all dependencies:
 
+    sbt package
     ./bundle
 
 Testing
